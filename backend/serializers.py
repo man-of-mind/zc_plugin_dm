@@ -67,7 +67,7 @@ class RoomInfoSerializer(serializers.Serializer):
 
 
 class GetMessageSerializer(serializers.Serializer):
-    room_id = serializers.CharField(max_length=128)
+#    room_id = serializers.CharField(max_length=128)
     date = serializers.DateField(format="%d-%m-%Y", input_formats=['%d-%m-%Y', 'iso-8601'], required=False)
 
 

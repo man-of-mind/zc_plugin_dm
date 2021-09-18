@@ -170,30 +170,29 @@ def get_rooms(user_id):
 
 #get all the messages in a particular room
 def get_room_messages(room_id):
-    response = DB.read("dm_messages")
-    result = []
-    if "status_code" in response:
+    response = DB.read("dm_messages", {'room_id': room_id})
+    if response != None:
+        if "status_code" in response:
+            return response
         return response
-    for message in response:
-        try:
-            if message['room_id'] == room_id:
-                result.append(message)
-        except Exception:
-            pass
-    result.reverse()
-    return result
+    return response
 
 
 #get all the messages in a particular room filtered by date
 def get_messages(response, date):
     res = []
-    if "status_code" in response:
-        return response
-    for message in response:
-        try:
-            query_date = message['created_at'].split("T")[0]
-            if query_date == date:
-                res.append(message)
-        except Exception:
-            pass
-    return res
+    if response != None:
+        if "status_code" in response:
+            return response
+        for message in response:
+            try:
+                query_date = message['created_at'].split("T")[0]
+                if query_date == date:
+                    res.append(message)
+            except Exception:
+                pass
+        if len(res) == 0:
+            res = None
+            return res
+        return res
+    return response

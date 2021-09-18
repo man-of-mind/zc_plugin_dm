@@ -12,6 +12,7 @@ from .resmodels import *
 from .serializers import *
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework.pagination import PageNumberPagination
 
 
 def index(request):
@@ -234,43 +235,42 @@ def getUserRooms(request):
             if len(res) == 0:
                 return Response(data="No rooms available", status=status.HTTP_204_NO_CONTENT)
             return Response(res, status=status.HTTP_200_OK)
-        return Response(data="Provide a user_id", status=status.HTTP_400_BAD_REQUEST)
+        return Response(query_param_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 @swagger_auto_schema(methods=['get'], query_serializer=GetMessageSerializer, responses={201: MessageResponse, 400: "Error: Bad Request"})
 @api_view(["GET"])
-def getRoomMessages(request):
+def room_messages(request, room_id):
     """
-    This is used to retrieve messages in a room. It takes a room_id and/or a date as query params.
-    If only the room_id is provided, it returns a list of all the messages if available,
-    or a 204 status code if there is no message in the room. 
-    If both room_id and date are provided, it returns all the messages in that room for that
-    particular date.
-    If there is no room_id in the query params, it returns a 404 status code.
+    This is used to retrieve messages in a room.
+    It returns a 204 status code if there is no message in the room. 
+    The messages can be filter by adding date in the query, 
+    it also returns a 204 status if there is no messages.
     """
     if request.method == "GET":
-        room_id = request.GET.get("room_id", None)
+        paginator = PageNumberPagination()
+        paginator.page_size = 20
         date = request.GET.get("date", None)
         params_serializer = GetMessageSerializer(data=request.GET.dict())
-        all_rooms = DB.read("dm_rooms")
-        
+        all_rooms = DB.read("dm_rooms")     
         if params_serializer.is_valid():
             is_room_avalaible = len([room for room in all_rooms if room.get('_id', None) == room_id]) != 0
             if is_room_avalaible:
                 messages = get_room_messages(room_id)
-                param_len = len(params_serializer.data)
-                if param_len ==2:
+                if date != None:
                     messages_by_date = get_messages(messages, date)
-                    if len(messages_by_date) == 0:
+                    if messages_by_date == None or "message" in messages_by_date:
                         return Response(data="No messages available", status=status.HTTP_204_NO_CONTENT)
-                    return Response(messages_by_date, status=status.HTTP_200_OK)
+                    messages_page = paginator.paginate_queryset(messages_by_date, request)
+                    return paginator.get_paginated_response(messages_page)
                 else:
-                    if len(messages) == 0:
+                    if messages == None or "message" in messages:
                         return Response(data="No messages available", status=status.HTTP_204_NO_CONTENT)
-                    return Response(messages, status=status.HTTP_200_OK)
+                    result_page = paginator.paginate_queryset(messages, request)
+                    return paginator.get_paginated_response(result_page)
             return Response(data="No such room", status=status.HTTP_400_BAD_REQUEST)
-        return Response(data="Provide the room_id or/and date", status=status.HTTP_400_BAD_REQUEST)
+        return Response(params_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
