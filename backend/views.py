@@ -255,7 +255,7 @@ def create_room(request):
     responses={400: "Error: Bad Request"},
 )
 @api_view(["GET"])
-def getUserRooms(request):
+def getUserRooms(request, user_id):
     """
     This is used to retrieve all rooms a user is currently active in.
     It takes in a user_id as query param and returns the rooms for that user or a 204 status code
@@ -263,13 +263,10 @@ def getUserRooms(request):
     If the user_id is not provided, a 400 status code is returned.
     """
     if request.method == "GET":
-        res = get_rooms(request.GET.get("user_id", None))
-        query_param_serializer = UserRoomsSerializer(data=request.GET.dict())
-        if query_param_serializer.is_valid():
-            if res == None:
-                return Response(data="No rooms available", status=status.HTTP_204_NO_CONTENT)
-            return Response(res, status=status.HTTP_200_OK)
-        return Response(query_param_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        res = get_rooms(user_id)
+        if res == None:
+            return Response(data="No rooms available", status=status.HTTP_204_NO_CONTENT)
+        return Response(res, status=status.HTTP_200_OK)
     return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
