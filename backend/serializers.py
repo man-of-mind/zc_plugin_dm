@@ -72,7 +72,7 @@ class GetMessageSerializer(serializers.Serializer):
 
 
 class UserRoomsSerializer(serializers.Serializer):
-    room_id = serializers.CharField(max_length=128)
+#    room_id = serializers.CharField(max_length=128)
     user_id = serializers.CharField(max_length=128)
 
 

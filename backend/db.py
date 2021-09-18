@@ -155,17 +155,22 @@ def get_user_rooms(collection_name, org_id, user):
 def get_rooms(user_id):
     response = DB.read("dm_rooms")
     data =  []
-    if "status_code" in response:
-        return response
-    for room in response:
-        try:
-            users_room_list = room['room_user_ids']
-            if user_id in users_room_list:
-                data.append(room)
-        except Exception:
-            pass
+    if response != None:
+        if "status_code" in response:
+            return response
+        for room in response:
+            try:
+                users_room_list = room['room_user_ids']
+                if user_id in users_room_list:
+                    data.append(room)
+            except Exception:
+                pass
+        if len(data) == 0:
+            data = None
+            return data
+        return data
     
-    return data
+    return response
 
 
 #get all the messages in a particular room

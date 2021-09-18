@@ -232,7 +232,7 @@ def getUserRooms(request):
         res = get_rooms(request.GET.get("user_id", None))
         query_param_serializer = UserRoomsSerializer(data=request.GET.dict())
         if query_param_serializer.is_valid():
-            if len(res) == 0:
+            if res == None:
                 return Response(data="No rooms available", status=status.HTTP_204_NO_CONTENT)
             return Response(res, status=status.HTTP_200_OK)
         return Response(query_param_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
