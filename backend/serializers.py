@@ -23,8 +23,6 @@ class ThreadSerializer(serializers.Serializer):
 class MessageSerializer(serializers.Serializer):
     sender_id = serializers.CharField(max_length=128)
     room_id = serializers.CharField(max_length=128)
-    message = serializers.CharField(max_length=128)
-    media = serializers.ListField(child=serializers.URLField(), allow_empty=True)
     message = serializers.CharField()
     media = serializers.ListField(child=serializers.URLField(), allow_empty=True, required=False, default=[])
     read = serializers.BooleanField(default=False, required=False)
@@ -67,12 +65,10 @@ class RoomInfoSerializer(serializers.Serializer):
 
 
 class GetMessageSerializer(serializers.Serializer):
-#    room_id = serializers.CharField(max_length=128)
     date = serializers.DateField(format="%d-%m-%Y", input_formats=['%d-%m-%Y', 'iso-8601'], required=False)
 
 
 class UserRoomsSerializer(serializers.Serializer):
-#    room_id = serializers.CharField(max_length=128)
     user_id = serializers.CharField(max_length=128)
 
 
@@ -86,3 +82,13 @@ class BookmarkSerializer(serializers.Serializer):
         if not re.match(pattern, value):
             raise serializers.ValidationError("Invalid link for bookmark")
         return value
+
+
+class ReadSerializer(serializers.Serializer):
+    message_id = serializers.CharField(max_length=128)
+
+class CookieSerializer(serializers.Serializer):
+    cookie = serializers.CharField(max_length=150)
+
+class DeleteMessageSerializer(serializers.Serializer):
+    message_id = serializers.CharField(max_length=128)
